@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+[ -n "$(snapctl get address)" ] || snapctl set address=127.0.0.1:3000
+install -d -m 0750 -o _daemon_ -g _daemon_ "$SNAP_COMMON/nginx"

@@ -1,0 +1,88 @@
+name: drawdb
+base: core26
+version: '1.8.2'
+title: drawDB
+icon: snap/gui/drawdb.png
+summary: Database diagram editor and SQL generator
+description: |
+  drawDB is a browser-based database schema editor. Design tables and
+  relationships visually, import SQL or DBML, and export diagrams and SQL
+  for MySQL, PostgreSQL, SQLite, MariaDB, SQL Server and other databases.
+
+  **Getting started**
+
+  Open http://127.0.0.1:3000/editor after installation. The service starts
+  automatically. Diagrams are saved in your browser, not in the snap's
+  data directory. Export diagrams to keep a backup.
+
+  To open it to your network:
+
+     sudo snap set drawdb address=0.0.0.0:3000
+
+  Sharing and remote version history require the optional upstream backend,
+  which is not included. Some editor assets require an internet connection.
+license: AGPL-3.0
+grade: stable
+confinement: strict
+website: https://www.drawdb.app
+source-code:
+  - https://github.com/drawdb-io/drawdb
+  - https://github.com/sidalit/drawdb-snap
+issues:
+  - https://github.com/drawdb-io/drawdb/issues
+  - https://github.com/sidalit/drawdb-snap/issues
+contact: https://github.com/sidalit/drawdb-snap/issues
+
+platforms:
+  amd64:
+  arm64:
+
+system-usernames:
+  _daemon_: shared
+
+apps:
+  drawdb:
+    command: bin/drawdb-launch
+    daemon: simple
+    restart-condition: on-failure
+    plugs:
+      - network
+      - network-bind
+
+parts:
+  drawdb:
+    plugin: nil
+    source: https://github.com/drawdb-io/drawdb.git
+    source-tag: v$SNAPCRAFT_PROJECT_VERSION
+    build-packages:
+      - nodejs
+      - npm
+    build-environment:
+      - NODE_OPTIONS: --max-old-space-size=4096
+      - HUSKY: '0'
+    override-build: |
+      npm ci --no-audit --no-fund
+      npm run build
+      mkdir -p "$CRAFT_PART_INSTALL/share/drawdb"
+      cp -r dist/. "$CRAFT_PART_INSTALL/share/drawdb/"
+      install -Dm644 LICENSE "$CRAFT_PART_INSTALL/share/doc/drawdb/LICENSE"
+      notices="$CRAFT_PART_INSTALL/share/doc/drawdb/dependencies"
+      mkdir -p "$notices"
+      find node_modules -type f \( -iname 'license*' -o -iname 'licence*' \
+        -o -iname 'copying*' -o -iname 'notice*' \) -exec cp --parents -t "$notices" {} +
+
+  nginx:
+    plugin: nil
+    stage-packages:
+      - nginx
+      - util-linux
+    prime:
+      - usr/sbin/nginx
+      - usr/bin/setpriv
+      - etc/nginx/mime.types
+      - usr/lib/**
+      - usr/share/doc/**
+
+  scripts:
+    plugin: dump
+    source: snap/local
