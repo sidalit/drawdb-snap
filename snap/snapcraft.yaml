@@ -75,10 +75,8 @@ parts:
     plugin: nil
     stage-packages:
       - nginx
-      - util-linux
     prime:
       - usr/sbin/nginx
-      - usr/bin/setpriv
       - etc/nginx/mime.types
       - usr/lib/**
       - usr/share/doc/**

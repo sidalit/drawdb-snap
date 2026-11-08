@@ -36,7 +36,7 @@ http {
 }
 EOF
 
-exec "$SNAP/usr/bin/setpriv" \
+exec /usr/bin/setpriv \
   --clear-groups --reuid _daemon_ --regid _daemon_ -- \
   "$SNAP/usr/sbin/nginx" \
   -p "$SNAP_COMMON/nginx/" -c "$SNAP_DATA/nginx.conf" \
